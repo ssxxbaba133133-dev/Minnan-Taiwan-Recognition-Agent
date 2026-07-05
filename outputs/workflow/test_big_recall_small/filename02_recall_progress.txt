@@ -1,0 +1,7 @@
+started: 2026-05-14 15:49:48
+updated: 2026-05-14 15:49:53
+source: F:\新建文件夹_高精度正立面
+output: C:\Users\Cc\Desktop\TempleRecognitionAgent\outputs\workflow\test_big_recall_small
+processed: 88/88
+included_existing: 0
+new_kept: 83

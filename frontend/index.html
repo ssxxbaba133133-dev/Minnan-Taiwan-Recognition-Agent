@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>宫庙课题科研助手</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="mark">T</div>
+        <div>
+          <strong>宫庙课题科研助手</strong>
+          <span id="status">&#36830;&#25509;&#20013;</span>
+        </div>
+      </div>
+      <button id="newChatBtn" class="new-chat">&#26032;&#23545;&#35805;</button>
+      <div class="hint">
+        <p>&#21487;&#30452;&#25509;&#25226;&#22270;&#29255;&#12289;&#22810;&#24352;&#22270;&#29255;&#25110; ZIP &#25302;&#21040;&#23545;&#35805;&#31383;&#21475;&#12290;</p>
+        <p>&#20063;&#25903;&#25345; Ctrl+V &#31896;&#36148;&#25130;&#22270;&#12289;&#22270;&#29255;&#25110;&#25991;&#20214;&#12290;</p>
+        <p>&#25903;&#25345;&#32852;&#32593;&#25628;&#32034;&#12290;</p>
+        <p>&#20363;&#22914;&#65306;&#8220;&#21578;&#35785;&#25105;&#36825;&#20010;&#22270;&#29255;&#20013;&#30340;&#23467;&#24217;&#24314;&#31569;&#30340;&#21508;&#31181;&#26500;&#25104;&#35201;&#32032;&#31867;&#22411;&#8221;</p>
+      </div>
+    </aside>
+
+    <section id="dropZone" class="chat-shell">
+      <div id="chat" class="chat"></div>
+      <div id="dropOverlay" class="drop-overlay">&#26494;&#24320;&#21518;&#28155;&#21152;&#25991;&#20214;</div>
+
+      <footer class="composer">
+        <div id="attachments" class="attachments"></div>
+        <form id="chatForm" class="composer-form">
+          <button id="pickFileBtn" type="button" class="icon-btn" title="Add files">+</button>
+          <textarea id="message" rows="1" placeholder="&#21457;&#36865;&#28040;&#24687;&#65292;&#25110;&#25226;&#22270;&#29255;&#25302;&#21040;&#36825;&#37324;"></textarea>
+          <button id="webSearchToggleBtn" type="button" aria-pressed="false">&#32852;&#32593;&#25628;&#32034;</button>
+          <button id="sendBtn" type="submit">&#21457;&#36865;</button>
+        </form>
+        <input id="fileInput" type="file" multiple accept="image/*,.zip,.rar" hidden />
+      </footer>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

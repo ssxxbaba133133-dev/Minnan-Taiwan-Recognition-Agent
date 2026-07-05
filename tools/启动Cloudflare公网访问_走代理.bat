@@ -1,0 +1,11 @@
+@echo off
+chcp 65001 >nul
+cd /d "%~dp0"
+echo ???? 127.0.0.1:10795 ???? Cloudflare Tunnel...
+echo ?????????? https://xxxx.trycloudflare.com ????????
+echo ??????????????
+echo.
+"%~dp0proxychains\proxychains_win32_x64.exe" -f "%~dp0proxychains\cloudflare_proxychains.conf" "%~dp0cloudflared.exe" tunnel --protocol quic --edge-ip-version 4 --metrics 127.0.0.1:0 --url http://localhost:7860
+echo.
+echo Cloudflare Tunnel ????
+pause

@@ -1,0 +1,19 @@
+INFO:     127.0.0.1:58727 - "GET /api/status HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58860 - "GET /api/status HTTP/1.1" 404 Not Found
+INFO:     36.248.205.241:0 - "GET / HTTP/1.1" 200 OK
+INFO:     36.248.205.241:0 - "GET /styles.css HTTP/1.1" 200 OK
+INFO:     36.248.205.241:0 - "GET /app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59274 - "GET / HTTP/1.1" 200 OK
+INFO:     36.248.205.241:0 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     36.248.205.241:0 - "POST /api/agent_message HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59464 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59466 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     36.248.205.241:0 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     36.248.205.1:0 - "GET / HTTP/1.1" 200 OK
+INFO:     36.248.205.1:0 - "GET /styles.css HTTP/1.1" 200 OK
+INFO:     36.248.205.1:0 - "GET /app.js HTTP/1.1" 200 OK
+INFO:     36.248.205.1:0 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     36.248.205.1:0 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     36.248.205.1:0 - "GET / HTTP/1.1" 200 OK
+INFO:     36.248.205.1:0 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64453 - "GET /api/health HTTP/1.1" 200 OK

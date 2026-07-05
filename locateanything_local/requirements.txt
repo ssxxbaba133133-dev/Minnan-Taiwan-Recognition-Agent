@@ -1,0 +1,9 @@
+# Install the CUDA build of torch/torchvision first, then install this file.
+transformers==4.57.1
+peft
+decord==0.6.0
+lmdb==1.7.5
+opencv-python-headless==4.11.0.86
+numpy>=1.26,<3
+Pillow>=11.1.0
+PyQt5

@@ -1,0 +1,9 @@
+# Optional dependencies for nvidia/LocateAnything-3B.
+# Install the CUDA build of torch/torchvision that matches your GPU driver first.
+transformers==4.57.1
+peft
+decord==0.6.0
+lmdb==1.7.5
+opencv-python-headless==4.11.0.86
+numpy==1.25.0
+Pillow==11.1.0

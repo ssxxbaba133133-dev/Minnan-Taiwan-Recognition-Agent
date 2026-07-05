@@ -1,0 +1,78 @@
+# -*- coding: utf-8 -*-
+from __future__ import annotations
+
+import json
+import os
+import urllib.error
+import urllib.request
+from typing import Any, Dict, List, Optional
+
+
+DEFAULT_BASE_URL = "http://127.0.0.1:1234/v1"
+
+
+class LMStudioClient:
+    def __init__(self, base_url: Optional[str] = None, api_key: Optional[str] = None, model: Optional[str] = None):
+        self.base_url = (base_url or os.getenv("LMSTUDIO_BASE_URL") or DEFAULT_BASE_URL).rstrip("/")
+        self.api_key = api_key if api_key is not None else os.getenv("LMSTUDIO_API_KEY", "")
+        self.model = model or os.getenv("LMSTUDIO_MODEL", "qwen3.5-9b")
+
+    def _request(self, method: str, path: str, payload: Optional[Dict[str, Any]] = None, timeout: int = 120) -> Any:
+        body = None if payload is None else json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+        req = urllib.request.Request(f"{self.base_url}{path}", data=body, headers=headers, method=method)
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")
+            raise RuntimeError(f"LM Studio HTTP {exc.code}: {detail}") from exc
+        except urllib.error.URLError as exc:
+            raise RuntimeError(f"Cannot connect to LM Studio at {self.base_url}: {exc.reason}") from exc
+
+    def models(self) -> List[str]:
+        data = self._request("GET", "/models", timeout=15)
+        return [item.get("id", "") for item in data.get("data", []) if item.get("id")]
+
+    def chat(self, messages: List[Dict[str, str]], temperature: float = 0.4, max_tokens: int = 2048) -> Dict[str, Any]:
+        payload = {
+            "model": self.model,
+            "messages": messages,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+        data = self._request("POST", "/chat/completions", payload=payload, timeout=180)
+        message = data.get("choices", [{}])[0].get("message", {})
+        content = _repair_mojibake(message.get("content") or "")
+        reasoning_content = _repair_mojibake(message.get("reasoning_content") or "")
+        return {
+            "model": data.get("model", self.model),
+            "content": content,
+            "reasoning_content": reasoning_content,
+            "raw": data,
+        }
+
+
+def _repair_mojibake(text: str) -> str:
+    """Repair common UTF-8-as-CP1252 mojibake seen in some local model replies."""
+    if not text:
+        return text
+    markers = ("Ã", "Â", "â", "ã€", "ï¼", "æ", "è", "ç", "å", "é")
+    if not any(marker in text for marker in markers):
+        return text
+    try:
+        raw = bytearray()
+        for ch in text:
+            code = ord(ch)
+            if code <= 255:
+                raw.append(code)
+            else:
+                raw.extend(ch.encode("cp1252"))
+        repaired = bytes(raw).decode("utf-8")
+    except UnicodeError:
+        return text
+    cjk_count = sum(1 for ch in repaired if "\u4e00" <= ch <= "\u9fff")
+    old_cjk_count = sum(1 for ch in text if "\u4e00" <= ch <= "\u9fff")
+    return repaired if cjk_count > old_cjk_count else text
