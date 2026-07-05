@@ -1,6 +1,6 @@
 # Minnan Taiwan Recognition Agent
 
-闽台宫庙建筑图像识别 Agent。项目提供一个本地网页聊天入口，将远程 OpenAI-compatible 大语言模型 API 与本地宫庙建筑视觉识别模型连接起来，支持单图、多图、ZIP 批量上传、结果整理和导出。
+闽台宫庙建筑图像识别 Agent。项目提供一个本地网页聊天入口，将远程大语言模型API与本地宫庙建筑视觉识别模型连接起来，支持单图、多图、ZIP 批量上传、结果整理和导出。
 
 ## 功能
 
@@ -88,31 +88,4 @@ tools/                   cpolar、cloudflared 等辅助工具
 docs/                    补充说明文档
 ```
 
-## 常见问题
 
-### 克隆后模型文件很小
-
-说明 Git LFS 文件没有拉取下来。运行：
-
-```powershell
-git lfs install
-git lfs pull
-```
-
-### 后端能启动，但聊天报模型 API 错误
-
-检查 `.env` 中的 `MODEL_API_BASE_URL` 是否以 `/v1` 结尾，确认公网隧道正在运行，并确认远程服务能访问 `/v1/models`。
-
-### 图片识别报模型文件缺失
-
-确认 `desktop_app/models` 下的 `.pt`、`.pth` 权重文件已通过 Git LFS 拉取完成。
-
-### 端口被占用
-
-默认端口是 `7860`。可以先运行：
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\agent_control.ps1 stop
-```
-
-再重新启动。
