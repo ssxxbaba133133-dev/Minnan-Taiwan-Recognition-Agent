@@ -1,4 +1,4 @@
-# Minnan Taiwan Recognition Agent
+# Minnan-Taiwan Recognition Agent
 
 闽台宫庙建筑图像识别 Agent。项目提供一个本地网页聊天入口，将远程大语言模型API与本地宫庙建筑视觉识别模型连接起来，支持单图、多图、ZIP 批量上传、结果整理和导出。
 
