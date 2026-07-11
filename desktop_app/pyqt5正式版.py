@@ -520,7 +520,11 @@ def convert_labels_to_chinese(labels: List[str]) -> List[str]:
 class TileNet(nn.Module):
     def __init__(self, backbone_name: str, n_tile: int):
         super().__init__()
-        m = models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
+        # The task checkpoint bundled with the application contains the full
+        # network state.  Using DEFAULT here makes torchvision contact the
+        # internet for ImageNet weights on a new computer, which breaks the
+        # portable/offline package.
+        m = models.resnet34(weights=None)
         self.feat_dim = m.fc.in_features
         m.fc = nn.Identity()
         self.backbone = m
@@ -1694,22 +1698,29 @@ class InferenceEngine:
     def _load_tashou_model(self) -> LoadedModel:
         path = MODEL_PATHS["塌寿三分类"]
         ckpt = self._safe_load_ckpt(path)
-        if not isinstance(ckpt, dict) or "model_state_dict" not in ckpt or "class_to_idx" not in ckpt:
-            raise RuntimeError("塌寿权重格式不符合新脚本要求：必须包含 model_state_dict 和 class_to_idx")
+        if not isinstance(ckpt, dict) or "class_to_idx" not in ckpt:
+            raise RuntimeError("塌寿权重格式不符合要求：必须包含模型状态和 class_to_idx")
+        state_dict = ckpt.get("model_state_dict") or ckpt.get("model")
+        if not isinstance(state_dict, dict):
+            raise RuntimeError("塌寿权重中未找到 model_state_dict 或 model")
         class_to_idx = {str(k).lower(): int(v) for k, v in ckpt["class_to_idx"].items()}
         idx_to_class = {int(v): str(k) for k, v in class_to_idx.items()}
         labels = [idx_to_class[i] for i in sorted(idx_to_class.keys())]
         num_classes = len(labels)
-        weights = EfficientNet_V2_S_Weights.DEFAULT
+        # This checkpoint is a ResNeXt-50 32x4d state dict (the grouped
+        # convolution shapes distinguish it from a plain ResNet/EfficientNet).
+        # Use the enum only for preprocessing metadata and never request its
+        # downloadable ImageNet parameters.
+        weights = models.ResNeXt50_32X4D_Weights.DEFAULT
         mean = list(weights.transforms().mean)
         std = list(weights.transforms().std)
-        model = efficientnet_v2_s(weights=weights)
-        model.classifier[1] = nn.Linear(model.classifier[1].in_features, num_classes)
-        missing, unexpected = model.load_state_dict(ckpt["model_state_dict"], strict=False)
+        model = models.resnext50_32x4d(weights=None)
+        model.fc = nn.Linear(model.fc.in_features, num_classes)
+        model.load_state_dict(strip_module_prefix(state_dict), strict=True)
         model.to(self.device)
         model.eval()
         info = (
-            f"骨干网络：efficientnet_v2_s\n"
+            f"骨干网络：torchvision.models.resnext50_32x4d\n"
             f"预处理：Resize(int({TASHOU_INFER_CONFIG['img_size']}*{TASHOU_INFER_CONFIG['resize_scale']})) + CenterCrop({TASHOU_INFER_CONFIG['img_size']})\n"
             f"类别来源：checkpoint.class_to_idx\n"
             f"类别名：{', '.join(labels)}"
@@ -1719,10 +1730,6 @@ class InferenceEngine:
                 info += f"\ncheckpoint记录精度：{float(ckpt['acc']):.2f}%"
             except Exception:
                 pass
-        if missing:
-            info += f"\nmissing keys: {len(missing)}"
-        if unexpected:
-            info += f"\nunexpected keys: {len(unexpected)}"
         return LoadedModel(
             task_name="塌寿三分类",
             model=model,
@@ -1746,7 +1753,9 @@ class InferenceEngine:
         weights = Swin_V2_T_Weights.DEFAULT
         mean = list(weights.transforms().mean)
         std = list(weights.transforms().std)
-        model = models.swin_v2_t(weights=weights)
+        # Avoid downloading torchvision pretraining; the bundled checkpoint is
+        # the authoritative full state for this task.
+        model = models.swin_v2_t(weights=None)
         model.head = nn.Linear(model.head.in_features, len(labels))
         state = ckpt["model_state"] if isinstance(ckpt, dict) and "model_state" in ckpt else ckpt
         model.load_state_dict(strip_module_prefix(state), strict=True)

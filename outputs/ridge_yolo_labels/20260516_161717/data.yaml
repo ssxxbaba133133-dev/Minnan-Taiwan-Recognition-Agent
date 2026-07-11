@@ -1,9 +1,0 @@
-path: C:/Users/Cc/Desktop/TempleRecognitionAgent/outputs/ridge_yolo_labels/20260516_161717
-train: images
-val: images
-names:
-  0: 龙
-  1: 珠
-  2: 塔
-  3: 瓶
-  4: 人物

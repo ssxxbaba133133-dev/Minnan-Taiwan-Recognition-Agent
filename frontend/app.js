@@ -9,6 +9,7 @@ const sendBtn = document.querySelector("#sendBtn");
 const attachmentsEl = document.querySelector("#attachments");
 const dropZone = document.querySelector("#dropZone");
 const newChatBtn = document.querySelector("#newChatBtn");
+const agentOfflineMessage = document.querySelector("#agentOfflineMessage");
 
 const history = [];
 let pendingFiles = [];
@@ -16,6 +17,10 @@ let lastImageFiles = [];
 let activeController = null;
 let activeRequestId = 0;
 let webSearchEnabled = localStorage.getItem("templeAgentWebSearch") === "1";
+let backendOnline = true;
+let consecutiveHealthFailures = 0;
+let healthCheckInFlight = false;
+let readyMessageShown = false;
 
 const ui = {
   ready: "\u6211\u5df2\u51c6\u5907\u597d\u3002\u4f60\u53ef\u4ee5\u50cf ChatGPT \u4e00\u6837\u628a\u56fe\u7247\u62d6\u5230\u7a97\u53e3\uff0c\u7136\u540e\u76f4\u63a5\u63d0\u51fa\u8bc6\u522b\u3001\u7b5b\u9009\u3001\u6574\u7406\u6216\u590d\u6838\u9700\u6c42\u3002",
@@ -26,7 +31,51 @@ const ui = {
   backendBad: "\u540e\u7aef\u672a\u8fde\u63a5",
   newChat: "\u65b0\u5bf9\u8bdd\u5df2\u5f00\u59cb\u3002",
   stopped: "\u5df2\u7ec8\u6b62\u672c\u6b21\u56de\u7b54\u3002",
+  closedDuringRequest: "Agent \u5df2\u5173\u95ed\uff0c\u672c\u6b21\u4efb\u52a1\u5df2\u4e2d\u65ad\u3002",
 };
+
+function setAgentAvailability(isOnline) {
+  if (backendOnline === isOnline && agentOfflineMessage.hidden === isOnline) return;
+  backendOnline = isOnline;
+  agentOfflineMessage.hidden = isOnline;
+  formEl.classList.toggle("agent-offline", !isOnline);
+  messageEl.disabled = !isOnline;
+  pickFileBtn.disabled = !isOnline;
+  webSearchToggleBtn.disabled = !isOnline;
+  sendBtn.disabled = !isOnline;
+
+  if (!isOnline && activeController) {
+    activeController.abort();
+  }
+  if (isOnline) messageEl.focus();
+}
+
+async function checkBackendHealth({ immediate = false } = {}) {
+  if (healthCheckInFlight) return backendOnline;
+  healthCheckInFlight = true;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2500);
+  try {
+    const res = await fetch(`/api/health?heartbeat=${Date.now()}`, {
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    await res.json();
+    consecutiveHealthFailures = 0;
+    setAgentAvailability(true);
+    return true;
+  } catch (err) {
+    consecutiveHealthFailures += 1;
+    if (immediate || consecutiveHealthFailures >= 2) {
+      setAgentAvailability(false);
+    }
+    return false;
+  } finally {
+    clearTimeout(timeoutId);
+    healthCheckInFlight = false;
+  }
+}
 
 function isSupportedUpload(file) {
   const lower = (file.name || "").toLowerCase();
@@ -228,18 +277,20 @@ function renderAttachments() {
 }
 
 async function loadHealth() {
-  try {
-    const res = await fetch("/api/health");
-    const data = await res.json();
-    statusEl.textContent = "";
+  const online = await checkBackendHealth({ immediate: true });
+  statusEl.textContent = "";
+  if (online && !readyMessageShown) {
+    readyMessageShown = true;
     addMessage("assistant", ui.ready);
-  } catch (err) {
-    statusEl.textContent = "";
-    addMessage("assistant", `${ui.backendBad}: ${err.message || err}`);
   }
 }
 
 async function sendMessage() {
+  if (!backendOnline) {
+    setAgentAvailability(false);
+    return;
+  }
+
   if (activeController) {
     abortCurrentResponse();
     return;
@@ -289,9 +340,10 @@ async function sendMessage() {
     if (requestId !== activeRequestId) return;
     pendingRow.remove();
     if (err.name === "AbortError") {
-      addMessage("assistant", ui.stopped);
+      addMessage("assistant", backendOnline ? ui.stopped : ui.closedDuringRequest);
     } else {
       addMessage("assistant", `Error: ${err.message}`);
+      checkBackendHealth({ immediate: true });
     }
   } finally {
     if (requestId === activeRequestId) {
@@ -377,3 +429,4 @@ newChatBtn.addEventListener("click", () => {
 
 renderWebSearchToggle();
 loadHealth();
+setInterval(() => checkBackendHealth(), 3000);

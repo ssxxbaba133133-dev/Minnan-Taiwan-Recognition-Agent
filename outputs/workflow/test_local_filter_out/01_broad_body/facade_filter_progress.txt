@@ -1,7 +1,0 @@
-started: 2026-05-14 15:44:18
-updated: 2026-05-14 15:44:24
-source: F:\新建文件夹_高精度正立面
-target: C:\Users\Cc\Desktop\TempleRecognitionAgent\outputs\workflow\test_local_filter_out\01_broad_body
-processed: 248/248
-kept: 248
-rejected: 0

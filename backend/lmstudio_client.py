@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 import urllib.error
 import urllib.request
@@ -13,6 +14,7 @@ DEFAULT_BASE_URL = "http://127.0.0.1:1234/v1"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUN_AGENT_BAT = PROJECT_ROOT / "run_agent.bat"
 ENV_FILE = PROJECT_ROOT / ".env"
+DEFAULT_ENV_FILE = PROJECT_ROOT / "config" / "runtime.conf"
 
 
 def _parse_key_value_lines(text: str, from_batch: bool = False) -> Dict[str, str]:
@@ -66,6 +68,7 @@ class LMStudioClient:
     def __init__(self, base_url: Optional[str] = None, api_key: Optional[str] = None, model: Optional[str] = None):
         settings = {}
         settings.update(_load_settings_file(RUN_AGENT_BAT, from_batch=True))
+        settings.update(_load_settings_file(DEFAULT_ENV_FILE))
         settings.update(_load_settings_file(ENV_FILE))
         self.base_url = (
             base_url
@@ -84,15 +87,24 @@ class LMStudioClient:
         headers = {"Content-Type": "application/json"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
-        req = urllib.request.Request(f"{self.base_url}{path}", data=body, headers=headers, method=method)
-        try:
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                return json.loads(resp.read().decode("utf-8"))
-        except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")
-            raise RuntimeError(f"Model API HTTP {exc.code}: {detail}") from exc
-        except urllib.error.URLError as exc:
-            raise RuntimeError(f"Cannot connect to model API at {self.base_url}: {exc.reason}") from exc
+        url = f"{self.base_url}{path}"
+        last_error: Optional[BaseException] = None
+        for attempt in range(3):
+            req = urllib.request.Request(url, data=body, headers=headers, method=method)
+            try:
+                with urllib.request.urlopen(req, timeout=timeout) as resp:
+                    return json.loads(resp.read().decode("utf-8"))
+            except urllib.error.HTTPError as exc:
+                detail = exc.read().decode("utf-8", errors="replace")
+                if exc.code < 500 or attempt == 2:
+                    raise RuntimeError(f"Model API HTTP {exc.code}: {detail}") from exc
+                last_error = exc
+            except urllib.error.URLError as exc:
+                last_error = exc
+                if attempt == 2:
+                    raise RuntimeError(f"Cannot connect to model API at {self.base_url}: {exc.reason}") from exc
+            time.sleep(1.0 * (attempt + 1))
+        raise RuntimeError(f"Cannot connect to model API at {self.base_url}: {last_error}")
 
     def models(self) -> List[str]:
         data = self._request("GET", "/models", timeout=15)

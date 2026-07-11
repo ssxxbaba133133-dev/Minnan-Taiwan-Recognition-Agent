@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>宫庙课题科研助手</title>
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/styles.css?v=1.0.3" />
 </head>
 <body>
   <main class="app">
@@ -36,11 +36,14 @@
           <textarea id="message" rows="1" placeholder="&#21457;&#36865;&#28040;&#24687;&#65292;&#25110;&#25226;&#22270;&#29255;&#25302;&#21040;&#36825;&#37324;"></textarea>
           <button id="webSearchToggleBtn" type="button" aria-pressed="false">&#32852;&#32593;&#25628;&#32034;</button>
           <button id="sendBtn" type="submit">&#21457;&#36865;</button>
+          <div id="agentOfflineMessage" class="composer-offline-message" role="alert" aria-live="assertive" hidden>
+            Agent &#24050;&#20851;&#38381;&#65292;&#35831;&#37325;&#26032;&#21452;&#20987;&#8220;&#21551;&#21160;Agent.bat&#8221;&#65307;&#37325;&#26032;&#21551;&#21160;&#21518;&#23558;&#33258;&#21160;&#24674;&#22797;&#12290;
+          </div>
         </form>
         <input id="fileInput" type="file" multiple accept="image/*,.zip,.rar" hidden />
       </footer>
     </section>
   </main>
-  <script src="/app.js"></script>
+  <script src="/app.js?v=1.0.3"></script>
 </body>
 </html>

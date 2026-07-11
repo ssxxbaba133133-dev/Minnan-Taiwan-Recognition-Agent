@@ -1,91 +1,86 @@
-# Minnan-Taiwan Recognition Agent
+# 闽台宫庙建筑识别 Agent
 
-闽台宫庙建筑图像识别 Agent。项目提供一个本地网页聊天入口，将远程大语言模型API与本地宫庙建筑视觉识别模型连接起来，支持单图、多图、ZIP 批量上传、结果整理和导出。
+这是闽台宫庙建筑识别 Agent 的源代码仓库。当前源码版本为 **1.0.3**，对应 GitHub Release `v1.0.3`。
 
-## 功能
+## 下载可直接使用的 Windows 版本
 
-- 远程大语言模型调用：通过 `MODEL_API_BASE_URL` 连接公网模型 API，下载者本地不需要部署语言大模型。
-- 宫庙建筑图像识别：支持屋顶样式、开间、瓦片、屋脊装饰、建筑主体区域、建筑屋顶区域等任务。
-- 批量处理：支持多图和 ZIP 上传，输出识别结果、标注图、CSV 和 JSON。
-- 正立面筛选：可对大量宫庙图片进行正立面/主体建筑筛选与整理。
-- LocateAnything 接入：保留通用视觉定位相关代码和独立示例。
-- 网页聊天界面：启动后访问 `http://127.0.0.1:7860` 使用。
+普通用户请前往 [Releases](https://github.com/ssxxbaba133133-dev/Minnan-Taiwan-Recognition-Agent/releases) 下载：
 
-## 重要说明
+`TempleRecognitionAgent-Windows-CPU-1.0.3.zip`
 
-本仓库包含视觉模型权重、示例数据和历史输出文件，体积较大，并使用 Git LFS 管理大文件。克隆前请先安装 Git LFS，否则 `.pt`、`.pth`、图片、压缩包等文件可能只会下载为 LFS 指针文件。
+Release 压缩包内已经包含 Windows Python 运行环境、程序依赖和 7 个视觉识别模型。解压后双击 `启动Agent.bat` 即可使用，不需要另外安装 Python，也不会在首次识别时下载视觉模型。
 
-```powershell
-git lfs install
-git clone https://github.com/ssxxbaba133133-dev/Minnan-Taiwan-Recognition-Agent.git
-cd Minnan-Taiwan-Recognition-Agent
-git lfs pull
+本仓库默认分支只保存源码、构建脚本和清单，不重复提交约 1.8 GiB 的运行环境、模型权重、用户上传图片或识别结果。因此 GitHub 自动生成的 `Source code (zip)` 不是可直接运行的完整成品。
+
+## 主要功能
+
+- 塌寿三分类
+- 屋顶四分类
+- 开间分类
+- 瓦片分类
+- 屋脊装饰识别
+- 建筑主体区域识别
+- 建筑屋顶区域识别
+- OpenAI-compatible 远程大模型对话
+- 可选联网搜索、批量图片和压缩包处理
+
+视觉识别在本机运行；大模型对话通过网络调用配置的 OpenAI-compatible API。
+
+## 项目结构
+
+```text
+backend/                    Web API、任务路由和模型调用
+frontend/                   浏览器聊天界面
+desktop_app/                视觉识别桌面程序源码
+desktop_app/models/         模型目录说明（权重仅随 Release 提供）
+scripts/                    启动、验证、构建和辅助脚本
+config/runtime.conf.example 远程模型接口配置示例
+models-manifest.json        7 个视觉权重的文件名、大小和 SHA256
+runtime-manifest.json       便携运行环境版本清单
 ```
 
-语言大模型走远程 API；视觉识别模型权重已放在 `desktop_app/models` 中。
+## 远程大模型配置
 
-## 环境安装
+开发或自行构建时，将 `config/runtime.conf.example` 复制为 `config/runtime.conf`，再填写自己的接口信息：
 
-推荐 Python 3.10 或 3.11。进入项目根目录后安装依赖：
-
-```powershell
-pip install -r requirements.txt
+```text
+MODEL_API_BASE_URL=https://your-server.example/v1
+MODEL_API_KEY=replace-with-your-api-token
+MODEL_NAME=your-model-id
+ENABLE_LOCATE_ANYTHING=0
 ```
 
-如果要使用 NVIDIA GPU 运行视觉模型，建议先按自己的 CUDA 版本安装对应的 PyTorch，再安装本项目依赖。
+接口需要兼容：
 
-## 远程模型 API 配置
-
-项目通过 `.env` 读取远程模型 API：
-
-```env
-MODEL_API_BASE_URL=https://your-public-api.example/v1
-MODEL_API_KEY=your-api-key
-MODEL_NAME=qwen3.5-27b@q3_k_s
-```
-
-接口需要兼容 OpenAI Chat Completions，至少应支持：
-
-- `GET /v1/models`
 - `POST /v1/chat/completions`
+- 推荐提供 `GET /v1/models`
+- 如需鉴权，使用 `Authorization: Bearer <token>`
 
-可以使用 LM Studio、vLLM、Ollama OpenAI-compatible server、llama.cpp server 等在模型机器上启动服务，再通过 cpolar、Cloudflare Tunnel、frp 或反向代理暴露公网地址。
+`config/runtime.conf` 和 `.env` 已被忽略，请勿把真实 Token 提交到仓库。
 
-## 启动
+## 从源码构建便携包
 
-Windows 下可直接双击：
-
-```text
-run_agent.bat
-```
-
-或使用控制脚本：
+源码仓库不包含 `runtime/` 和模型权重。维护者需要先把 `models-manifest.json` 中列出的权重放入 `desktop_app/models/`，然后构建 CPU 便携环境：
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\agent_control.ps1 start
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\agent_control.ps1 status
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\agent_control.ps1 stop
+powershell -ExecutionPolicy Bypass -File scripts\build_portable_runtime.ps1 -BuilderPython "C:\path\to\python.exe"
 ```
 
-启动成功后打开：
+完成后运行验证和打包：
 
-```text
-http://127.0.0.1:7860
+```powershell
+runtime\python.exe scripts\verify_package.py --full --imports
+powershell -ExecutionPolicy Bypass -File scripts\build_release_zip.ps1
 ```
 
-## 目录结构
+## 本地数据
 
-```text
-backend/                 FastAPI 后端与模型调用逻辑
-frontend/                网页聊天界面
-desktop_app/             原桌面识别程序和视觉模型权重
-desktop_app/models/      YOLO/分类模型权重
-scripts/                 批处理、筛选、标注和控制脚本
-locateanything_local/    LocateAnything 本地示例
-data/                    上传数据和示例数据
-outputs/                 历史输出、标注图、CSV、JSON
-tools/                   cpolar、cloudflared 等辅助工具
-docs/                    补充说明文档
-```
+- 上传文件写入 `data/`
+- 识别结果写入 `outputs/`
+- 这些目录中的运行数据不会提交到 GitHub
 
+## 模型与许可证
 
+视觉权重的再分发要求见 [MODEL_LICENSE_NOTICE.md](MODEL_LICENSE_NOTICE.md)。本仓库目前没有声明覆盖全部代码与模型的统一开源许可证；公开仓库不等同于自动授予再使用许可。
+
+`LocateAnything-3B` 属于未随标准包提供的实验性外部模型，默认关闭，详见 `docs/LocateAnything接入说明.md`。

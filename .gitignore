@@ -1,6 +1,32 @@
+# Local configuration and secrets
+.env
+config/runtime.conf
+
+# Portable build output
+runtime/
+.build/
+build/
+dist/
+*.spec
+
+# Bundled model weights belong in GitHub Releases, not the source branch
+desktop_app/models/*.pt
+desktop_app/models/*.pth
+desktop_app/models/*.onnx
+desktop_app/models/*.bin
+
+# User uploads, generated results, logs, and caches
+data/*
+!data/.gitkeep
+outputs/*
+!outputs/.gitkeep
+*.log
 __pycache__/
 *.py[cod]
-.venv/
-venv/
-/outputs/chat/*
-!/outputs/chat/.gitkeep
+.pytest_cache/
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

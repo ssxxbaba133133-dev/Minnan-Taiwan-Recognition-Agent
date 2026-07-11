@@ -8,15 +8,15 @@
 - 返回目标框坐标和带框预览图。
 - 作为现有 YOLO/分类模型的补充，用来处理开放词表目标。
 
+## 标准包状态
+
+标准 Windows Release 不包含 `LocateAnything-3B` 模型或其额外依赖，且通过 `ENABLE_LOCATE_ANYTHING=0` 默认关闭。下面内容仅用于维护者将外部服务接入源码，不影响随包提供的 7 个宫庙视觉任务。
+
 ## 安装
 
 建议在 WSL2 Ubuntu 或 Linux + NVIDIA GPU 环境里运行。
 
-先安装匹配 CUDA 的 PyTorch，然后安装可选依赖：
-
-```powershell
-pip install -r requirements_locate_anything.txt
-```
+请在独立环境中安装与目标 GPU、CUDA 和模型版本匹配的 PyTorch、Transformers 及该模型要求的可选依赖。本仓库不固定或随包分发这组实验性依赖。
 
 如果你在 Windows 原生环境运行，模型可能能加载，但更容易遇到 CUDA、flash attention、视频/视觉预处理依赖问题。
 
@@ -39,7 +39,7 @@ $env:LOCATE_ANYTHING_MAX_NEW_TOKENS="8192"
 curl.exe -X POST http://127.0.0.1:7860/api/locate_anything `
   -F "query=roof ridge dragon" `
   -F "mode=all" `
-  -F "files=@E:\TempleRecognitionAgent\data\uploads\example.jpg"
+  -F "files=@C:\path\to\example.jpg"
 ```
 
 返回字段里重点看：
@@ -76,4 +76,3 @@ curl.exe -X POST http://127.0.0.1:7860/api/locate_anything `
 - 推理封装：`backend/locate_anything_client.py`
 - 独立接口：`backend/app.py` 的 `/api/locate_anything`
 - 聊天显式触发：`backend/app.py` 的 `/api/agent_message`
-

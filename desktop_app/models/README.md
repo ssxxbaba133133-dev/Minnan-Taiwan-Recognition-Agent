@@ -1,5 +1,5 @@
-# Model weights are not bundled
+# 本地视觉模型
 
-This remote API package intentionally does not include local vision model weights.
+本目录随便携版提供 7 个任务权重。程序只从本目录加载这些权重，不会在首次运行时下载 torchvision 或 Ultralytics 模型。
 
-The language model is called through `MODEL_API_BASE_URL`. Image recognition tasks still need the original YOLO/classification files in this folder, or a separate remote vision service.
+文件信息记录在项目根目录的 `models-manifest.json`，启动程序会静默检查必要模型。

@@ -1,7 +1,0 @@
-INFO:     127.0.0.1:50421 - "GET /api/health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51282 - "GET /api/health HTTP/1.1" 200 OK
-INFO:     117.28.251.132:0 - "GET / HTTP/1.1" 200 OK
-INFO:     117.28.251.132:0 - "GET /app.js HTTP/1.1" 200 OK
-INFO:     117.28.251.132:0 - "GET /styles.css HTTP/1.1" 200 OK
-INFO:     117.28.251.132:0 - "GET /favicon.ico HTTP/1.1" 404 Not Found
-INFO:     117.28.251.132:0 - "GET /api/health HTTP/1.1" 200 OK

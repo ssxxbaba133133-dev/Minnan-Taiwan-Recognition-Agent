@@ -1,0 +1,5 @@
+# OpenAI-compatible model API example. Copy this file to runtime.conf.
+MODEL_API_BASE_URL=https://your-server.example/v1
+MODEL_API_KEY=replace-with-your-api-token
+MODEL_NAME=your-model-id
+ENABLE_LOCATE_ANYTHING=0

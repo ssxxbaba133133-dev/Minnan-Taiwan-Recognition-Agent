@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import os
 import shutil
 import time
 import json
@@ -47,6 +48,7 @@ class FacadeFilterRequest(BaseModel):
 
 
 MAX_CHAT_PREVIEW_IMAGES = 12
+ENABLE_LOCATE_ANYTHING = os.getenv("ENABLE_LOCATE_ANYTHING", "0").strip().lower() in {"1", "true", "yes", "on"}
 BODY_REGION_TASK = "\u5efa\u7b51\u4e3b\u4f53\u533a\u57df\u8bc6\u522b"
 ROOF_REGION_TASK = "\u5efa\u7b51\u5c4b\u9876\u533a\u57df\u8bc6\u522b"
 
@@ -163,6 +165,8 @@ def _looks_ridge_yolo_annotation_request(message: str) -> bool:
 
 
 def _looks_locate_anything_request(message: str) -> bool:
+    if not ENABLE_LOCATE_ANYTHING:
+        return False
     msg = (message or "").lower()
     markers = [
         "locateanything",
@@ -652,6 +656,17 @@ def health():
     }
 
 
+@app.get("/api/ready")
+def ready():
+    """Local-only readiness check that never contacts the remote model API."""
+    tasks = recognition_engine.tasks()
+    return {
+        "ok": True,
+        "task_count": len(tasks),
+        "models_ready": all(item.get("model_exists") for item in tasks),
+    }
+
+
 @app.get("/api/tasks")
 def tasks():
     return {"tasks": recognition_engine.tasks()}
@@ -979,6 +994,11 @@ def analyze(task: str = Form(...), files: List[UploadFile] = File(...)):
 
 @app.post("/api/locate_anything")
 def locate_anything(query: str = Form(...), mode: str = Form("all"), files: List[UploadFile] = File(...)):
+    if not ENABLE_LOCATE_ANYTHING:
+        raise HTTPException(
+            status_code=404,
+            detail="LocateAnything-3B is not part of the standard portable package.",
+        )
     run_id = time.strftime("%Y%m%d_%H%M%S")
     upload_dir = DATA_DIR / "locate_anything_uploads" / run_id
     output_dir = OUTPUT_DIR / "locate_anything" / run_id

@@ -1,0 +1,49 @@
+{
+  "format_version": 1,
+  "model_count": 7,
+  "total_bytes": 442213308,
+  "models": [
+    {
+      "file": "desktop_app/models/body_yolo_best.pt",
+      "bytes": 22530602,
+      "sha256": "1D982A8BE229165D8E0A244DFBB78B8A74595FD3188EE4269DBC62C04169FB25",
+      "tasks": ["建筑主体区域识别"]
+    },
+    {
+      "file": "desktop_app/models/kaijian_best_swinv2.pth",
+      "bytes": 110842196,
+      "sha256": "9C88A78DE04461A88BB3B5A94604DC8B20B2648EA2BBF0EC999665C4EDB9F2B9",
+      "tasks": ["开间分类"]
+    },
+    {
+      "file": "desktop_app/models/roof_resnet34_best.pth",
+      "bytes": 85292811,
+      "sha256": "256575E1ECE611E643859556B2FEE2692232C5146192A071D6553FC2A661BF91",
+      "tasks": ["屋顶四分类"]
+    },
+    {
+      "file": "desktop_app/models/roof_ridge_ornament_best.pt",
+      "bytes": 23424415,
+      "sha256": "7ACA6E7440EB4791AEB30CD6B84F8F2282CA2BA04CA7F79295E7EE0C59DB2F63",
+      "tasks": ["屋脊装饰识别"]
+    },
+    {
+      "file": "desktop_app/models/roof_yolo_best.pt",
+      "bytes": 22526058,
+      "sha256": "7B989D05814221B95BE5E0F6D9AD1C9A82A7EAD2D117A2491395DA14F69EEED0",
+      "tasks": ["建筑屋顶区域识别", "屋顶四分类前置定位"]
+    },
+    {
+      "file": "desktop_app/models/tashou_best.pth",
+      "bytes": 92322303,
+      "sha256": "EF9494881E01808ADA678E049A42686358421315B889DF0BE6F5F4F93CA0E427",
+      "tasks": ["塌寿三分类"]
+    },
+    {
+      "file": "desktop_app/models/tile_best.pt",
+      "bytes": 85274923,
+      "sha256": "43CB3FB4143E23CFDF28E71ADDECDDA8FA4AC093A3B7D4BF67A559D4EC60E6BB",
+      "tasks": ["瓦片分类"]
+    }
+  ]
+}

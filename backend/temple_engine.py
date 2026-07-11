@@ -92,6 +92,11 @@ class TempleRecognitionEngine:
         task_labels = getattr(self.module, "TASK_LABELS", {})
         tasks = []
         for name, model_path in model_paths.items():
+            # Do not advertise placeholder tasks that have no model assigned.
+            # Every task returned by this endpoint must be usable from the
+            # self-contained package.
+            if not model_path:
+                continue
             tasks.append({
                 "name": name,
                 "labels": task_labels.get(name, []),
