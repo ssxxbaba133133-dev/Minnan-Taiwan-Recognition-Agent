@@ -1,6 +1,6 @@
 # 闽台宫庙建筑识别 Agent
 
-这是闽台宫庙建筑识别 Agent 的源代码仓库。当前源码版本为 **1.0.3**，对应 GitHub Release `v1.0.3`。
+
 
 ## 下载可直接使用的 Windows 版本
 
@@ -14,14 +14,14 @@ Release 压缩包内已经包含 Windows Python 运行环境、程序依赖和 7
 
 ## 主要功能
 
-- 塌寿三分类
-- 屋顶四分类
+- 塌寿分类
+- 屋顶分类
 - 开间分类
 - 瓦片分类
 - 屋脊装饰识别
 - 建筑主体区域识别
 - 建筑屋顶区域识别
-- OpenAI-compatible 远程大模型对话
+- 远程大模型对话
 - 可选联网搜索、批量图片和压缩包处理
 
 视觉识别在本机运行；大模型对话通过网络调用配置的 OpenAI-compatible API。
@@ -39,24 +39,6 @@ models-manifest.json        7 个视觉权重的文件名、大小和 SHA256
 runtime-manifest.json       便携运行环境版本清单
 ```
 
-## 远程大模型配置
-
-开发或自行构建时，将 `config/runtime.conf.example` 复制为 `config/runtime.conf`，再填写自己的接口信息：
-
-```text
-MODEL_API_BASE_URL=https://your-server.example/v1
-MODEL_API_KEY=replace-with-your-api-token
-MODEL_NAME=your-model-id
-ENABLE_LOCATE_ANYTHING=0
-```
-
-接口需要兼容：
-
-- `POST /v1/chat/completions`
-- 推荐提供 `GET /v1/models`
-- 如需鉴权，使用 `Authorization: Bearer <token>`
-
-`config/runtime.conf` 和 `.env` 已被忽略，请勿把真实 Token 提交到仓库。
 
 ## 从源码构建便携包
 
@@ -82,5 +64,3 @@ powershell -ExecutionPolicy Bypass -File scripts\build_release_zip.ps1
 ## 模型与许可证
 
 视觉权重的再分发要求见 [MODEL_LICENSE_NOTICE.md](MODEL_LICENSE_NOTICE.md)。本仓库目前没有声明覆盖全部代码与模型的统一开源许可证；公开仓库不等同于自动授予再使用许可。
-
-`LocateAnything-3B` 属于未随标准包提供的实验性外部模型，默认关闭，详见 `docs/LocateAnything接入说明.md`。
